@@ -1,0 +1,22 @@
+{
+    "name": "baby_names",
+    "description": "baby name statistics",
+    "source": "",
+    "expected_frequency": "1m",
+    "versions": [
+        {
+            "id": "20200101",
+            "file": "20200101.csv",
+            "date": "2020-01-01 00:00:00",
+            "hash": "abcdef",
+            "difference": 0.2
+        },
+        {
+            "id": "20200201",
+            "file": "20200201.csv",
+            "date": "2020-02-01 00:00:00",
+            "hash": "sdfsdef",
+            "difference": 0.2
+        }
+    ]
+}
