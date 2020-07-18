@@ -31,13 +31,12 @@ class Danvers:
             raise Exception("Source of '" + source + \
                 "' does not exist or does not have valid danvers.json file.")
 
-    def get_data(self, source, version='latest'):
+    def get_filename(self, source, version='latest'):
         source_config = self.get_source(source)
         if version == 'latest':
             version = self._get_latest_version(source_config)
         filename = self._get_filename_from_version(source_config, version)
         """
-        TODO: if the file is older than the update frequency, raise a warning
         TODO: if the file doesn't exist, raise a warning
         """
         return filename
@@ -58,7 +57,16 @@ class Danvers:
         pass
 
     def _get_latest_version(self, config):
-        pass
+        version = 0
+        for item in config['versions']:
+            if item['id'] > version:
+                version = item['id']
+        if version == 0:
+            raise Exception('No versions found')
+        return version
 
     def _get_filename_from_version(self, config, version):
-        pass
+        for item in config['versions']:
+            if item['id'] == version:
+                return item['filename']
+        raise Exception('Version not found')
