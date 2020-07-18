@@ -8,19 +8,19 @@ dataset = 'marvel_movies'
 if not dataset in vers.read_datasets():
     vers.create_dataset(dataset)
 
-# add the first dataset, should return verion 1
+# add the first data file, should return verion 1
 version = vers.create_data_file(dataset, r'test_data\movies_phase_1.csv')
 print(version, vers.get_data_file(dataset))
 
-# adding the same file should return version 1 again
+# adding the same data file should return version 1 again
 version = vers.create_data_file(dataset, r'test_data\movies_phase_1.csv')
 print(version, vers.get_data_file(dataset))
 
-# adding a new file should return version 2
+# adding a new data file should return version 2
 version = vers.create_data_file(dataset, r'test_data\movies_phase_1+2.csv')
 print(version, vers.get_data_file(dataset))
 
-# adding another new file should return version 3
+# adding another new data file should return version 3
 version = vers.create_data_file(dataset, r'test_data\movies_phase_1+2+3.csv')
 print(version, vers.get_data_file(dataset))
 
