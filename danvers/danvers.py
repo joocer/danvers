@@ -1,7 +1,3 @@
-"""
-Danvers is a simple file-based data versioning system.
-"""
-
 import warnings
 import os
 import json
@@ -10,7 +6,9 @@ import datetime
 import shutil
 
 class Danvers:
-
+    """
+    Danvers is a simple file-based data versioning system.
+    """
 
     def __init__(self, location):
         self.location = location
@@ -84,14 +82,12 @@ class Danvers:
         """
         config = self.read_dataset(dataset)
         file_hash = self._hash_file(file)
-        #try:
-        version = self._get_matching_version(config, file_hash)
+
+        version = self._get_version_with_matching_hash(config, file_hash)
         if version != 0:
+            # TODO: update the config
             return version
         version = self._get_last_version(config)
-        #except:
-            # we're here if there are not existing versions
-        #    version = 0
 
         extension = os.path.splitext(file)[1]
         filename = file_hash[0:16] + extension
@@ -108,6 +104,14 @@ class Danvers:
         }
 
         config['versions'].append(item)
+        
+        if (config['max_versions'] > 0) and (len(config['versions']) > config['max_versions']):
+            pass
+        # TODO:
+        # if versions > number of versions
+        #   get the oldest version
+        #   delete the oldest version
+        
         self._update_dataset_config(dataset, config)
 
         return version + 1
@@ -116,14 +120,12 @@ class Danvers:
     def _get_last_updated_version(self, config):
         EPOCH = datetime.datetime(1970, 1, 1)
         last_added = EPOCH
-        version_dict = {}
+        version = 0
         for item in config['versions']:
             if datetime.datetime.fromisoformat(item['last_added']) > last_added:
                 last_added = datetime.datetime.fromisoformat(item['last_added'])
-                version_dict = item
-        if version_dict == {}:
-            raise Exception('No versions found')
-        return version_dict['version']
+                version = item['version']
+        return version
 
 
     def _get_last_version(self, config):
@@ -134,22 +136,29 @@ class Danvers:
         return version
 
 
-    def _get_matching_version(self, config, hash):
-        """
-        Searches through previous versions for versions matching hashes.
-        """
+    def _get_first_updated_version(self, config):
+        NOW = datetime.datetime.now()
+        first_added = NOW
         version = 0
         for item in config['versions']:
-            if item['hash'] == hash:
+            if datetime.datetime.fromisoformat(item['last_added']) < first_added:
+                first_added = datetime.datetime.fromisoformat(item['last_added'])
                 version = item['version']
-        return version   
+        return version
+
+
+    def _get_version_with_matching_hash(self, config, hash):
+        for item in config['versions']:
+            if item['hash'] == hash:
+                return item['version']
+        return 0   
 
 
     def _get_filename_from_version(self, config, version):
         for item in config['versions']:
             if item['version'] == version:
                 return item['filename']
-        raise 0
+        return 0
 
 
     def _hash_file(self, filename):
