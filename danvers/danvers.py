@@ -14,60 +14,60 @@ class Danvers:
 
     def __init__(self, location):
         self.location = location
+        os.makedirs(location, exist_ok=True)
 
-
-    def get_sources(self, source_regex=''):
-        if source_regex == '':
-            source_regex = '.+'
+    def read_datasets(self, dataset_regex=''):
+        if dataset_regex == '':
+            dataset_regex = '.+'
         results = []
         for folder_name in os.listdir(self.location):
-            if re.match(source_regex, folder_name):
+            if re.match(dataset_regex, folder_name):
                 results.append(folder_name)
         return results
 
 
-    def get_source(self, source):
-        config_file = os.path.join(self.location, source, 'danvers.json')
+    def read_dataset(self, dataset):
+        config_file = os.path.join(self.location, dataset, 'danvers.json')
         if os.path.isfile(config_file):
             with open(config_file) as json_file:
                 return json.load(json_file)
         else:
-            raise Exception("Source of '" + source + \
+            raise Exception("Date Set of '" + dataset + \
                 "' does not exist or does not have valid danvers.json file.")
 
 
-    def get_filename(self, source, version='latest'):
-        source_config = self.get_source(source)
+    def get_data_file(self, dataset, version='latest'):
+        dataset_config = self.read_dataset(dataset)
         if version == 'latest':
-            version, version_dict = self._get_latest_version(source_config)
-        filename = self._get_filename_from_version(source_config, version)
-        filepath = os.path.join(self.location, source, filename)
+            version, version_dict = self._get_latest_version(dataset_config)
+        filename = self._get_filename_from_version(dataset_config, version)
+        filepath = os.path.join(self.location, dataset, filename)
         if not os.path.isfile(filepath):
             raise Exception("File '" + filename + " does not exist.")
         return filepath
 
 
-    def put_source(self, source, description=''):
+    def create_dataset(self, dataset, description=''):
         config = { 
-            "name": source,
+            "set": dataset,
             "description": description,
             "versions": []
         }
-        path = os.path.join(self.location, source)
-        os.makedirs(path)
+        path = os.path.join(self.location, dataset)
+        os.makedirs(path, exist_ok=True)
         filepath = os.path.join(path, 'danvers.json')
         with open(filepath, 'w') as outfile:
             json.dump(config, outfile, ensure_ascii=False, indent=4)
 
 
-    def put_data(self, source, file):
+    def create_data_file(self, dataset, file):
         """
         Test if the file is a new version, if not, return the matching version
         if it is, create a new version and return that.
 
         Put a copy of the file in the appropriate data directory.
         """
-        config = self.get_source(source)
+        config = self.read_dataset(dataset)
         file_hash = self._hash_file(file)
         try:
             version, latest_version = self._get_latest_version(config)
@@ -80,7 +80,7 @@ class Danvers:
 
         extension = os.path.splitext(file)[1]
         filename = file_hash[0:16] + extension
-        file_path = os.path.join(self.location, source, filename)
+        file_path = os.path.join(self.location, dataset, filename)
 
         shutil.copyfile(file, file_path)
 
@@ -92,7 +92,7 @@ class Danvers:
         }
 
         config['versions'].append(item)
-        self._put_source_config(source, config)
+        self._update_dataset_config(dataset, config)
 
         return version + 1
 
@@ -129,7 +129,7 @@ class Danvers:
         return file_hash.hexdigest()
 
 
-    def _put_source_config(self, source, config):
-        config_file = os.path.join(self.location, source, 'danvers.json')
+    def _update_dataset_config(self, dataset, config):
+        config_file = os.path.join(self.location, dataset, 'danvers.json')
         with open(config_file, 'w') as outfile:
             json.dump(config, outfile, ensure_ascii=False, indent=4)
