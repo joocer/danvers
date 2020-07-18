@@ -33,7 +33,7 @@ class Danvers:
             with open(config_file) as json_file:
                 return json.load(json_file)
         else:
-            raise Exception("Date Set of '" + dataset + \
+            raise Exception("Data Set of '" + dataset + \
                 "' does not exist or does not have valid danvers.json file.")
 
 
